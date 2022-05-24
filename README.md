@@ -17,3 +17,7 @@ export TELEGRAM_TOKEN=<TOKEN>
 
 * Run `docker-compose up --build -d` to run the application.
 * Run `docker-compose stop` to stop the application.
+
+## Collaboraters
+
+Bado Tekin
