@@ -1,6 +1,6 @@
 # FPL Bot
 
-This repository contains the code of a bot which pushes live EPL updates to a telegram chat.
+This repository contains the code of a bot which pushes live FPL updates to a telegram chat.
 
 ## Preparation
 
