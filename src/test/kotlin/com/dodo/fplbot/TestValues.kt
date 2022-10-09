@@ -1,17 +1,10 @@
 package com.dodo.fplbot
 
-import com.dodo.fplbot.client.BootstrapDto
-import com.dodo.fplbot.client.ElementDto
-import com.dodo.fplbot.client.EventDto
-import com.dodo.fplbot.client.Identifier
-import com.dodo.fplbot.client.StatDto
-import com.dodo.fplbot.client.StatElementDto
-import com.dodo.fplbot.client.TeamDto
+import com.dodo.fplbot.client.*
 import java.time.ZonedDateTime
 
 const val EVENT_CODE = 2210543L
 const val CURRENT_EVENT = 27
-const val FUTURE_EVENT = 28
 const val HOME_TEAM = "Liverpool"
 const val AWAY_TEAM = "Man City"
 val MATCH_KICKOFF = ZonedDateTime.parse("2022-01-03T19:00:00+00:00")
@@ -75,20 +68,10 @@ val bootstrapDto = BootstrapDto(
         )
 )
 
-val futureEventContent = listOf(
-        EventDto(
-                code = EVENT_CODE,
-                event = FUTURE_EVENT,
-                kickOffTime = MATCH_KICKOFF,
-                finished = false,
-                finishedProvisional = false,
-                started = false,
-                homeTeam = 1,
-                homeTeamScore = 0,
-                awayTeam = 2,
-                awayTeamScore = 0,
-                stats = listOf()
-        )
+val gameContent = GameDto(
+        currentEvent = CURRENT_EVENT,
+        currentEventFinished = false,
+        waiversProcessed = true
 )
 
 val faultyEventContent = listOf(
@@ -286,7 +269,7 @@ val eventContent4 = listOf(
                         StatDto(
                                 identifier = Identifier.BONUS,
                                 homeTeamStats = listOf(
-                                        StatElementDto(1,1),
+                                        StatElementDto(1, 1),
                                         StatElementDto(2, 2)
                                 ),
                                 awayTeamStats = listOf(

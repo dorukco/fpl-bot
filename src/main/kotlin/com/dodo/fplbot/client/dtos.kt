@@ -60,6 +60,15 @@ data class StatElementDto(
         val element: Int?
 )
 
+data class GameDto(
+        @JsonProperty("current_event")
+        val currentEvent: Int?,
+        @JsonProperty("current_event_finished")
+        val currentEventFinished: Boolean?,
+        @JsonProperty("waivers_processed")
+        val waiversProcessed: Boolean?
+)
+
 enum class Identifier(@get:JsonValue val value: String) {
     GOALS_SCORED("goals_scored"),
     ASSISTS("assists"),

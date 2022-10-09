@@ -1,20 +1,9 @@
 package com.dodo.fplbot.service
 
-import com.dodo.fplbot.AWAY_TEAM
-import com.dodo.fplbot.CURRENT_EVENT
-import com.dodo.fplbot.EVENT_CODE
-import com.dodo.fplbot.HOME_TEAM
-import com.dodo.fplbot.MATCH_KICKOFF
-import com.dodo.fplbot.bootstrapDto
-import com.dodo.fplbot.client.FplEventClient
+import com.dodo.fplbot.*
+import com.dodo.fplbot.client.FplFixtureClient
+import com.dodo.fplbot.client.FplStatusClient
 import com.dodo.fplbot.client.Identifier
-import com.dodo.fplbot.eventContent
-import com.dodo.fplbot.eventContent1
-import com.dodo.fplbot.eventContent2
-import com.dodo.fplbot.eventContent3
-import com.dodo.fplbot.eventContent4
-import com.dodo.fplbot.faultyEventContent
-import com.dodo.fplbot.futureEventContent
 import com.dodo.fplbot.model.ChangedStat
 import com.dodo.fplbot.model.Event
 import com.dodo.fplbot.model.EventKey
@@ -42,20 +31,22 @@ import strikt.assertions.isNotNull
 class ContentServiceTest {
 
     private val mockEventContent = spyk<MutableMap<EventKey, Event>>()
-    private val fplEventClient = mockk<FplEventClient>()
+    private val fplFixtureClient = mockk<FplFixtureClient>()
+    private val fplStatusClient = mockk<FplStatusClient>()
     private val telegramBot = mockk<TelegramBot>(relaxed = true)
 
     private var contentService = ContentService(
             staticContent = bootstrapDto.toStaticContent(),
             eventContent = mockEventContent,
-            fplEventClient = fplEventClient,
+            fplFixtureClient = fplFixtureClient,
+            fplStatusClient = fplStatusClient,
             telegramBot = telegramBot
     )
 
     @Test
     fun `get content successfully`() {
-        every { fplEventClient.getFutureContent(1) } returns futureEventContent
-        every { fplEventClient.getContent(CURRENT_EVENT) } returns eventContent
+        every { fplStatusClient.getStatus() } returns gameContent
+        every { fplFixtureClient.getContent(CURRENT_EVENT) } returns eventContent
 
         val events = contentService.getContent()
         expectThat(events).isNotNull().hasSize(1).and {
@@ -75,15 +66,15 @@ class ContentServiceTest {
 
     @Test
     fun `get content unsuccessfully`() {
-        every { fplEventClient.getFutureContent(1) } throws Exception("Game is being processed.")
+        every { fplStatusClient.getStatus() } returns null
         val events = contentService.getContent()
         expectThat(events).isNotNull().isEmpty()
     }
 
     @Test
     fun `update event content`() {
-        every { fplEventClient.getFutureContent(1) } returns futureEventContent
-        every { fplEventClient.getContent(CURRENT_EVENT) } returns eventContent1
+        every { fplStatusClient.getStatus() } returns gameContent
+        every { fplFixtureClient.getContent(CURRENT_EVENT) } returns eventContent1
         val events = contentService.getContent()
 
         contentService.updateEventContent(events)
@@ -142,8 +133,8 @@ class ContentServiceTest {
 
     @Test
     fun `process match with no events`() {
-        every { fplEventClient.getFutureContent(1) } returns futureEventContent
-        every { fplEventClient.getContent(CURRENT_EVENT) } returns eventContent
+        every { fplStatusClient.getStatus() } returns gameContent
+        every { fplFixtureClient.getContent(CURRENT_EVENT) } returns eventContent
         every { mockEventContent[EventKey(EVENT_CODE, CURRENT_EVENT)] } returns eventContent.map { it.toEvent(bootstrapDto.toStaticContent()) }.first()
         val events = contentService.getContent()
 
@@ -153,8 +144,8 @@ class ContentServiceTest {
 
     @Test
     fun `process match with events`() {
-        every { fplEventClient.getFutureContent(1) } returns futureEventContent
-        every { fplEventClient.getContent(CURRENT_EVENT) } returns eventContent1
+        every { fplStatusClient.getStatus() } returns gameContent
+        every { fplFixtureClient.getContent(CURRENT_EVENT) } returns eventContent1
         every { mockEventContent[EventKey(EVENT_CODE, CURRENT_EVENT)] } returns eventContent.map { it.toEvent(bootstrapDto.toStaticContent()) }.first()
         val events = contentService.getContent()
 
@@ -173,8 +164,8 @@ class ContentServiceTest {
 
     @Test
     fun `process match with more events`() {
-        every { fplEventClient.getFutureContent(1) } returns futureEventContent
-        every { fplEventClient.getContent(CURRENT_EVENT) } returns eventContent2
+        every { fplStatusClient.getStatus() } returns gameContent
+        every { fplFixtureClient.getContent(CURRENT_EVENT) } returns eventContent2
         every { mockEventContent[EventKey(EVENT_CODE, CURRENT_EVENT)] } returns eventContent1.map { it.toEvent(bootstrapDto.toStaticContent()) }.first()
         val events = contentService.getContent()
 
@@ -193,8 +184,8 @@ class ContentServiceTest {
 
     @Test
     fun `process finished match`() {
-        every { fplEventClient.getFutureContent(1) } returns futureEventContent
-        every { fplEventClient.getContent(CURRENT_EVENT) } returns eventContent3
+        every { fplStatusClient.getStatus() } returns gameContent
+        every { fplFixtureClient.getContent(CURRENT_EVENT) } returns eventContent3
         every { mockEventContent[EventKey(EVENT_CODE, CURRENT_EVENT)] } returns eventContent2.map { it.toEvent(bootstrapDto.toStaticContent()) }.first()
         val events = contentService.getContent()
 
@@ -209,8 +200,8 @@ class ContentServiceTest {
 
     @Test
     fun `process match with bonus events`() {
-        every { fplEventClient.getFutureContent(1) } returns futureEventContent
-        every { fplEventClient.getContent(CURRENT_EVENT) } returns eventContent4
+        every { fplStatusClient.getStatus() } returns gameContent
+        every { fplFixtureClient.getContent(CURRENT_EVENT) } returns eventContent4
         every { mockEventContent[EventKey(EVENT_CODE, CURRENT_EVENT)] } returns eventContent3.map { it.toEvent(bootstrapDto.toStaticContent()) }.first()
         val events = contentService.getContent()
 
@@ -227,8 +218,8 @@ class ContentServiceTest {
 
     @Test
     fun `process match with faulty event`() {
-        every { fplEventClient.getFutureContent(1) } returns futureEventContent
-        every { fplEventClient.getContent(CURRENT_EVENT) } returns faultyEventContent
+        every { fplStatusClient.getStatus() } returns gameContent
+        every { fplFixtureClient.getContent(CURRENT_EVENT) } returns faultyEventContent
         every { mockEventContent[EventKey(EVENT_CODE, CURRENT_EVENT)] } returns eventContent4.map { it.toEvent(bootstrapDto.toStaticContent()) }.first()
         val events = contentService.getContent()
 

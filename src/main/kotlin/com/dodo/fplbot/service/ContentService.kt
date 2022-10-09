@@ -1,6 +1,7 @@
 package com.dodo.fplbot.service
 
-import com.dodo.fplbot.client.FplEventClient
+import com.dodo.fplbot.client.FplFixtureClient
+import com.dodo.fplbot.client.FplStatusClient
 import com.dodo.fplbot.client.Identifier
 import com.dodo.fplbot.model.ChangedStat
 import com.dodo.fplbot.model.ChangedStats
@@ -18,7 +19,8 @@ import org.springframework.stereotype.Service
 class ContentService(
         private val staticContent: StaticContent,
         private val eventContent: MutableMap<EventKey, Event>,
-        private val fplEventClient: FplEventClient,
+        private val fplFixtureClient: FplFixtureClient,
+        private val fplStatusClient: FplStatusClient,
         private val telegramBot: TelegramBot
 ) {
 
@@ -27,10 +29,9 @@ class ContentService(
     private val notifExcludes = listOf(Identifier.BPS, Identifier.SAVES)
 
     fun getContent(): Map<EventKey, Event>? = runCatching {
-        fplEventClient.getFutureContent(1).let { futureDtos ->
-            val futureEvent = futureDtos?.first()?.event
-            val currentEvent = if (futureEvent != null) futureEvent - 1 else return mapOf()
-            fplEventClient.getContent(currentEvent).let { dtos ->
+        fplStatusClient.getStatus().let { statusDto ->
+            val currentEvent = statusDto?.currentEvent ?: return mapOf()
+            fplFixtureClient.getContent(currentEvent).let { dtos ->
                 dtos?.map { EventKey(it.code, it.event) to it.toEvent(staticContent) }
             }?.toMap()
         }
