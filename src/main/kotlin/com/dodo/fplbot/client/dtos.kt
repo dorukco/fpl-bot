@@ -79,5 +79,7 @@ enum class Identifier(@get:JsonValue val value: String) {
     RED_CARD("red_cards"),
     SAVES("saves"),
     BONUS("bonus"),
-    BPS("bps")
+    BPS("bps"),
+    MNG_WIN("mng_underdog_win"),
+    MNG_DRAW("mng_underdog_draw")
 }

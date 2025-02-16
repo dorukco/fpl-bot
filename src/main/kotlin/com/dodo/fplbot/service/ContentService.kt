@@ -26,7 +26,7 @@ class ContentService(
 
     companion object : KLogging()
 
-    private val notifExcludes = listOf(Identifier.BPS, Identifier.SAVES)
+    private val notifExcludes = listOf(Identifier.BPS, Identifier.SAVES, Identifier.MNG_WIN, Identifier.MNG_DRAW)
 
     fun getContent(): Map<EventKey, Event>? = runCatching {
         fplStatusClient.getStatus().let { statusDto ->
