@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
-import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
 	id("org.springframework.boot") version "3.2.2"
@@ -49,12 +48,14 @@ tasks.withType<BootJar> {
 }
 
 kotlin {
-	jvmToolchain(21)
+	jvmToolchain {
+		languageVersion.set(JavaLanguageVersion.of(21))
+	}
 }
 
-tasks.withType<KotlinCompile> {
+tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "21"
-        freeCompilerArgs += "-Xjsr305=strict"
+        freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 }
